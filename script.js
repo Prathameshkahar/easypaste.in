@@ -120,8 +120,21 @@
     const attachmentInfo = byId('attachmentInfo');
     const dropZone = byId('dropZone');
     const copyPasteBtn = byId('copyPasteBtn');
+    const themeSwitch = byId('themeSwitch');
 
     let attachedFile = null;
+
+    const applyTheme = (theme) => {
+      const useLight = theme === 'light';
+      document.body.classList.toggle('light-mode', useLight);
+      document.documentElement.setAttribute('data-bs-theme', useLight ? 'light' : 'dark');
+      if (themeSwitch) {
+        themeSwitch.checked = !useLight;
+      }
+    };
+
+    const savedTheme = localStorage.getItem('pb-theme') || 'dark';
+    applyTheme(savedTheme);
 
     const updatePreview = () => {
       const content = editor.value;
@@ -181,12 +194,13 @@
     });
     dropZone.addEventListener('drop', (e) => setAttachment(e.dataTransfer.files[0]));
 
-    byId('toggleMode').addEventListener('click', () => {
-      document.body.classList.toggle('light-mode');
-    });
-    byId('theme').addEventListener('change', (e) => {
-      document.body.classList.toggle('light-mode', e.target.value === 'light');
-    });
+    if (themeSwitch) {
+      themeSwitch.addEventListener('change', () => {
+        const nextTheme = themeSwitch.checked ? 'dark' : 'light';
+        applyTheme(nextTheme);
+        localStorage.setItem('pb-theme', nextTheme);
+      });
+    }
 
     copyPasteBtn.addEventListener('click', async () => {
       await navigator.clipboard.writeText(editor.value);
